@@ -1,0 +1,18 @@
+.container {
+  max-width: 960px;
+}
+
+.card {
+  border: 0;
+  border-radius: 1rem;
+}
+
+.btn-primary {
+  background-color: #4f46e5;
+  border-color: #4f46e5;
+}
+
+.btn-primary:hover {
+  background-color: #4338ca;
+  border-color: #4338ca;
+}
