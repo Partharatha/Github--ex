@@ -1,47 +1,30 @@
-import { useEffect, useState } from 'react';
-import { fetchCollection } from '../utils/api';
+import { useEffect, useState } from "react";
 
-function Teams() {
-  const [teams, setTeams] = useState([]);
-  const [error, setError] = useState('');
+export default function Teams() {
+  const [data, setData] = useState([]);
+
+  const apiUrl = import.meta.env.VITE_CODESPACE_NAME
+    ? "https://${import.meta.env.VITE_CODESPACE_NAME}-8000.app.github.dev/api/teams/"
+    : "http://localhost:8000/api/teams/";
 
   useEffect(() => {
-    let isMounted = true;
-
-    fetchCollection('teams')
+    fetch(apiUrl)
+      .then((res) => res.json())
       .then((data) => {
-        if (isMounted) {
-          setTeams(data);
-        }
-      })
-      .catch((err) => {
-        if (isMounted) {
-          setError(err.message);
+        if (Array.isArray(data)) {
+          setData(data);
+        } else if (Array.isArray(data.items)) {
+          setData(data.items);
+        } else {
+          setData([]);
         }
       });
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   return (
-    <div className="card shadow-sm">
-      <div className="card-body">
-        <h2 className="h4">Teams</h2>
-        {error ? <div className="alert alert-danger">{error}</div> : null}
-        <ul className="list-group list-group-flush">
-          {teams.map((team) => (
-            <li className="list-group-item" key={team._id || team.name}>
-              <strong>{team.name}</strong>
-              <div className="text-muted">{team.sport || 'Fitness'}</div>
-              <div className="small">Members: {team.members?.length || 0}</div>
-            </li>
-          ))}
-        </ul>
-      </div>
+    <div>
+      <h2>Teams</h2>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
     </div>
   );
 }
-
-export default Teams;

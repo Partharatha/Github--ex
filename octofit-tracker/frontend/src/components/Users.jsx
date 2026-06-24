@@ -1,47 +1,30 @@
-import { useEffect, useState } from 'react';
-import { fetchCollection } from '../utils/api';
+import { useEffect, useState } from "react";
 
-function Users() {
-  const [users, setUsers] = useState([]);
-  const [error, setError] = useState('');
+export default function Users() {
+  const [data, setData] = useState([]);
+
+  const apiUrl = import.meta.env.VITE_CODESPACE_NAME
+    ? "https://${import.meta.env.VITE_CODESPACE_NAME}-8000.app.github.dev/api/users/"
+    : "http://localhost:8000/api/users/";
 
   useEffect(() => {
-    let isMounted = true;
-
-    fetchCollection('users')
+    fetch(apiUrl)
+      .then((res) => res.json())
       .then((data) => {
-        if (isMounted) {
-          setUsers(data);
-        }
-      })
-      .catch((err) => {
-        if (isMounted) {
-          setError(err.message);
+        if (Array.isArray(data)) {
+          setData(data);
+        } else if (Array.isArray(data.items)) {
+          setData(data.items);
+        } else {
+          setData([]);
         }
       });
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   return (
-    <div className="card shadow-sm">
-      <div className="card-body">
-        <h2 className="h4">Users</h2>
-        {error ? <div className="alert alert-danger">{error}</div> : null}
-        <ul className="list-group list-group-flush">
-          {users.map((user) => (
-            <li className="list-group-item" key={user._id || user.email}>
-              <strong>{user.name}</strong>
-              <div className="text-muted">{user.email}</div>
-              <div className="small text-capitalize">Role: {user.role || 'member'}</div>
-            </li>
-          ))}
-        </ul>
-      </div>
+    <div>
+      <h2>Users</h2>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
     </div>
   );
 }
-
-export default Users;

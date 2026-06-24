@@ -1,47 +1,30 @@
-import { useEffect, useState } from 'react';
-import { fetchCollection } from '../utils/api';
+import { useEffect, useState } from "react";
 
-function Activities() {
-  const [activities, setActivities] = useState([]);
-  const [error, setError] = useState('');
+export default function Activities() {
+  const [data, setData] = useState([]);
+
+  const apiUrl = import.meta.env.VITE_CODESPACE_NAME
+    ? "https://${import.meta.env.VITE_CODESPACE_NAME}-8000.app.github.dev/api/activities/"
+    : "http://localhost:8000/api/activities/";
 
   useEffect(() => {
-    let isMounted = true;
-
-    fetchCollection('activities')
+    fetch(apiUrl)
+      .then((res) => res.json())
       .then((data) => {
-        if (isMounted) {
-          setActivities(data);
-        }
-      })
-      .catch((err) => {
-        if (isMounted) {
-          setError(err.message);
+        if (Array.isArray(data)) {
+          setData(data);
+        } else if (Array.isArray(data.items)) {
+          setData(data.items);
+        } else {
+          setData([]);
         }
       });
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   return (
-    <div className="card shadow-sm">
-      <div className="card-body">
-        <h2 className="h4">Activities</h2>
-        {error ? <div className="alert alert-danger">{error}</div> : null}
-        <ul className="list-group list-group-flush">
-          {activities.map((activity) => (
-            <li className="list-group-item" key={activity._id || activity.date}>
-              <strong>{activity.type}</strong>
-              <div className="text-muted">{activity.date}</div>
-              <div className="small">{activity.durationMinutes} min • {activity.calories} kcal</div>
-            </li>
-          ))}
-        </ul>
-      </div>
+    <div>
+      <h2>Activities</h2>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
     </div>
   );
 }
-
-export default Activities;
